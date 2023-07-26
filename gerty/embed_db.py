@@ -1,0 +1,34 @@
+import os, sys
+import argparse
+from .gerty import Gerty
+
+def valid_path(path: str):
+    if os.path.exists(path):
+        return path 
+    raise argparse.ArgumentTypeError(f"Path does not exist: {path}") 
+
+def run():
+    parser = argparse.ArgumentParser(prog="distributive llama2 application", description="A small hack program for fun")
+    parser.add_argument("knowledge_base", nargs='+', type=str, help="A directory containing text files for the knowledge-base")
+    parser.add_argument("--url", action='store_true', help="Knowledge_base given is a url")
+    parser.add_argument("-c", "--cache", type=valid_path, help="Cache knowledge base to this file")
+    parser.add_argument("--context-length", type=int, default=2048, help="Context length to load the LLama embedding model with")
+
+    args = parser.parse_args()
+
+    gerty = Gerty(
+        n_ctx = args.context_length,
+    )
+    
+    if args.url:
+        gerty.embed_db( args.knowledge_base, args.cache, url = args.url) 
+    else:
+        gerty.embed_db( args.knowledge_base, args.cache, url = args.url, glob = '*.txt' )
+    
+    return
+
+
+
+
+if __name__ == "__main__":
+    run()
