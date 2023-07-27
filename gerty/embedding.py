@@ -8,6 +8,6 @@ def get_embeddings(n_ctx = 2048, n_gpu_layers=40, n_batch=512):
         n_ctx = n_ctx,
         n_gpu_layers=n_gpu_layers,
         n_batch = n_batch,
-        f16_kv = True
+        f16_kv = True,
     )
     

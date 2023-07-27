@@ -180,6 +180,28 @@ html5lib = ["html5lib"]
 lxml = ["lxml"]
 
 [[package]]
+name = "blinker"
+version = "1.6.2"
+description = "Fast, simple object-to-object and broadcast signaling"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "blinker-1.6.2-py3-none-any.whl", hash = "sha256:c3d739772abb7bc2860abf5f2ec284223d9ad5c76da018234f6f50d6f31ab1f0"},
+    {file = "blinker-1.6.2.tar.gz", hash = "sha256:4afd3de66ef3a9f8067559fb7a1cbe555c17dcbe15971b05d1b625c3e7abe213"},
+]
+
+[[package]]
+name = "cachelib"
+version = "0.10.2"
+description = "A collection of cache libraries in the same API interface."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "cachelib-0.10.2-py3-none-any.whl", hash = "sha256:42d49f2fad9310dd946d7be73d46776bcd4d5fde4f49ad210cfdd447fbdfc346"},
+    {file = "cachelib-0.10.2.tar.gz", hash = "sha256:593faeee62a7c037d50fc835617a01b887503f972fb52b188ae7e50e9cb69740"},
+]
+
+[[package]]
 name = "certifi"
 version = "2023.7.22"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -637,6 +659,44 @@ files = [
 ]
 
 [[package]]
+name = "flask"
+version = "2.3.2"
+description = "A simple framework for building complex web applications."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "Flask-2.3.2-py3-none-any.whl", hash = "sha256:77fd4e1249d8c9923de34907236b747ced06e5467ecac1a7bb7115ae0e9670b0"},
+    {file = "Flask-2.3.2.tar.gz", hash = "sha256:8c2f9abd47a9e8df7f0c3f091ce9497d011dc3b31effcf4c85a6e2b50f4114ef"},
+]
+
+[package.dependencies]
+blinker = ">=1.6.2"
+click = ">=8.1.3"
+importlib-metadata = {version = ">=3.6.0", markers = "python_version < \"3.10\""}
+itsdangerous = ">=2.1.2"
+Jinja2 = ">=3.1.2"
+Werkzeug = ">=2.3.3"
+
+[package.extras]
+async = ["asgiref (>=3.2)"]
+dotenv = ["python-dotenv"]
+
+[[package]]
+name = "flask-session"
+version = "0.5.0"
+description = "Server-side session support for Flask"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "Flask-Session-0.5.0.tar.gz", hash = "sha256:190875e6aebf2953c6803d42379ef3b934bc209ef8ef006f97aecb08f5aaeb86"},
+    {file = "flask_session-0.5.0-py3-none-any.whl", hash = "sha256:1619bcbc16f04f64e90f8e0b17145ba5c9700090bb1294e889956c1282d58631"},
+]
+
+[package.dependencies]
+cachelib = "*"
+flask = ">=2.2"
+
+[[package]]
 name = "flatbuffers"
 version = "23.5.26"
 description = "The FlatBuffers serialization format for Python"
@@ -883,6 +943,37 @@ docs = ["Sphinx", "docutils (<0.18)"]
 test = ["objgraph", "psutil"]
 
 [[package]]
+name = "gunicorn"
+version = "21.2.0"
+description = "WSGI HTTP Server for UNIX"
+optional = false
+python-versions = ">=3.5"
+files = [
+    {file = "gunicorn-21.2.0-py3-none-any.whl", hash = "sha256:3213aa5e8c24949e792bcacfc176fef362e7aac80b76c56f6b5122bf350722f0"},
+    {file = "gunicorn-21.2.0.tar.gz", hash = "sha256:88ec8bff1d634f98e61b9f65bc4bf3cd918a90806c6f5c48bc5603849ec81033"},
+]
+
+[package.dependencies]
+packaging = "*"
+
+[package.extras]
+eventlet = ["eventlet (>=0.24.1)"]
+gevent = ["gevent (>=1.4.0)"]
+setproctitle = ["setproctitle"]
+tornado = ["tornado (>=0.2)"]
+
+[[package]]
+name = "hashring"
+version = "1.5.1"
+description = "Implements consistent hashing in Python (using md5 as hashing function)."
+optional = false
+python-versions = "*"
+files = [
+    {file = "hashring-1.5.1-py2.py3-none-any.whl", hash = "sha256:f8498acc7fd0952a7e9a2cf6087ed33afbc96372d86eab705a836e31c4ede837"},
+    {file = "hashring-1.5.1.tar.gz", hash = "sha256:b3a4f78a51b80823565bb2132be9d60c98c79875006b7f47584a2c1e682e319f"},
+]
+
+[[package]]
 name = "huggingface-hub"
 version = "0.16.4"
 description = "Client library to download and publish models, datasets and other repos on the huggingface.co hub"
@@ -993,6 +1084,17 @@ typing_extensions = "*"
 
 [package.extras]
 aws = ["boto3"]
+
+[[package]]
+name = "itsdangerous"
+version = "2.1.2"
+description = "Safely pass data to untrusted environments and back."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "itsdangerous-2.1.2-py3-none-any.whl", hash = "sha256:2c2349112351b88699d8d4b6b075022c0808887cb7ad10069318a8b0bc88db44"},
+    {file = "itsdangerous-2.1.2.tar.gz", hash = "sha256:5dbbc68b317e5e42f327f9021763545dc3fc3bfe22e6deb96aaf1fc38874156a"},
+]
 
 [[package]]
 name = "jinja2"
@@ -1483,6 +1585,20 @@ packaging = ">=20.0"
 pillow = ">=6.2.0"
 pyparsing = ">=2.3.1,<3.1"
 python-dateutil = ">=2.7"
+
+[[package]]
+name = "memcache"
+version = "0.12.0"
+description = "Memcached client for Python"
+optional = false
+python-versions = ">=3.7,<4.0"
+files = [
+    {file = "memcache-0.12.0-py3-none-any.whl", hash = "sha256:bee47020321f8c5bf0f7daa03d97b67c3c9d708157061ed249af6b2b74be3de4"},
+    {file = "memcache-0.12.0.tar.gz", hash = "sha256:b14224df7b97769a1114c6bc3d6a0e684c42e7f033f5b5e77cbdc54418a5dfa7"},
+]
+
+[package.dependencies]
+hashring = ">=1.5.1,<2.0.0"
 
 [[package]]
 name = "mpmath"
@@ -3113,6 +3229,23 @@ socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
 zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
+name = "werkzeug"
+version = "2.3.6"
+description = "The comprehensive WSGI web application library."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "Werkzeug-2.3.6-py3-none-any.whl", hash = "sha256:935539fa1413afbb9195b24880778422ed620c0fc09670945185cce4d91a8890"},
+    {file = "Werkzeug-2.3.6.tar.gz", hash = "sha256:98c774df2f91b05550078891dee5f0eb0cb797a522c757a2452b9cee5b202330"},
+]
+
+[package.dependencies]
+MarkupSafe = ">=2.1.1"
+
+[package.extras]
+watchdog = ["watchdog (>=2.3)"]
+
+[[package]]
 name = "wikipedia"
 version = "1.4.0"
 description = "Wikipedia API for Python"
@@ -3258,4 +3391,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.1"
-content-hash = "6b6cc647757de80287662c7289efaab728e059e6ab55b5bf0a9f118ccc0ecd9d"
+content-hash = "923e2febb595d0fbb5270daa2bb67df150b43c22a3fb0538d31057dbb52ec76b"

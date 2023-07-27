@@ -37,7 +37,7 @@ class Gerty:
         self.n_ctx = n_ctx
 
         self.embedding_model = get_embeddings(n_ctx = self.n_ctx)
-        #self.language_model  = get_model(n_ctx = self.n_ctx)
+        self.language_model  = get_model(n_ctx = self.n_ctx)
         
         self.prompt_template = prompt_template
         self.prompt_variables = prompt_variables
@@ -50,12 +50,12 @@ class Gerty:
             template = self.prompt_template
         )
 
-    def get_qa_model(self):
+    def get_qa_model(self, memory=None):
         chain_type_kwargs = {
             "prompt": self.get_prompt() 
         }
         if self.conversational:
-            return self.__get_conversational_model(chain_type_kwargs)
+            return self.__get_conversational_model(chain_type_kwargs, memory = memory)
         return self.__get_retrieval_model(chain_type_kwargs)
 
     def __get_retrievers__(self):
@@ -67,8 +67,9 @@ class Gerty:
         )
 
     
-    def __get_conversational_model(self, chain_type_kwargs):
-        memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+    def __get_conversational_model(self, chain_type_kwargs, memory = None):
+        if memory is None:
+            memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
         return ConversationalRetrievalChain.from_llm(
             llm = self.language_model,
             retriever = self.db.as_retriever(),
