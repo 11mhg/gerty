@@ -1,4 +1,6 @@
-import os, sys
+import os, sys, json
+from threading import Thread 
+from queue import Queue
 from .embedding import get_embeddings
 from .llm import get_model
 from .webscrape import scrape_site
@@ -14,7 +16,8 @@ from langchain import PromptTemplate
 from langchain.chains import RetrievalQA, ConversationalRetrievalChain
 from langchain.retrievers import WikipediaRetriever
 
-DEFAULT_PROMPT_TEMPLATE = """The following is a friendly conversation between a human and an AI Assistant. The Assistant is talkative and provides lots of specific details from its context. If the Assistant does not know the answer to a question, it truthfully says it does not know. The Assistant responds to being called Gerty and uses Gerty as a nickname.
+
+DEFAULT_PROMPT_TEMPLATE = """The following is a conversation between a human and an AI Assistant. The Assistant is talkative and provides lots of specific details from its context. If the Assistant does not know the answer to a question, it truthfully says it does not know.
 
 Context: {context}
 
@@ -43,6 +46,7 @@ class Gerty:
         self.prompt_variables = prompt_variables
         self.conversational = conversational
         self.retrievers = []
+        self.merger_retriever = None
 
     def get_prompt(self):
         return PromptTemplate(
@@ -59,12 +63,14 @@ class Gerty:
         return self.__get_retrieval_model(chain_type_kwargs)
 
     def __get_retrievers__(self):
-        if len(self.retrievers) == 0:
+        if len(self.retrievers) == 0 or self.merger_retriever is None:
+            self.retrievers = []
             self.retrievers.append( self.db.as_retriever() )
-            self.retrievers.append( WikipediaRetriever() )
-        return MergerRetriever(
-            retrievers = self.retrievers 
-        )
+            #self.retrievers.append( WikipediaRetriever() )
+            self.merger_retriever = MergerRetriever(
+                retrievers = self.retrievers
+            )
+        return self.merger_retriever 
 
     
     def __get_conversational_model(self, chain_type_kwargs, memory = None):
@@ -72,7 +78,7 @@ class Gerty:
             memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
         return ConversationalRetrievalChain.from_llm(
             llm = self.language_model,
-            retriever = self.db.as_retriever(),
+            retriever = self.__get_retrievers__(),
             chain_type = "stuff",
             memory = memory,
             combine_docs_chain_kwargs = chain_type_kwargs
@@ -82,7 +88,7 @@ class Gerty:
         return RetrievalQA.from_chain_type(
             llm = self.language_model,
             chain_type = "stuff",
-            retriever = self.db.as_retriever(),
+            retriever = self.__get_retrievers__(),
             chain_type_kwargs = chain_type_kwargs
         )
 
@@ -118,3 +124,5 @@ class Gerty:
             self.db_cache_dir = cache_dir
         self.db = FAISS.load_local(self.db_cache_dir,self.embedding_model)
         return
+
+

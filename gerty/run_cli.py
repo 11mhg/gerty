@@ -1,6 +1,7 @@
 import os, sys
 import argparse
 from .embed_db import valid_path
+import time
 
 from .gerty import Gerty
 
@@ -25,6 +26,9 @@ def run():
 
     while True:
         query = input("Human: ")
+        start = time.time()
         answer = qa.run(query)
-        print(answer)
+        end = time.time()
+        print(f"{end - start} seconds - Assistant:",answer)
+
 

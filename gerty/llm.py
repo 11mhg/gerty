@@ -18,7 +18,7 @@ MODEL_PATH = os.path.realpath(
 def get_model(n_ctx = 2048, callback_manager: Optional[CallbackManager] = None):
     assert os.path.exists(MODEL_PATH), f"Model doesn't exist at path {MODEL_PATH}"
     
-    n_gpu_layers = 40
+    n_gpu_layers = 25 #40
     n_batch = 512
 
     llm = LlamaCpp(
