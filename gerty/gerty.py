@@ -11,10 +11,16 @@ from langchain.retrievers.merger_retriever import MergerRetriever
 from langchain.document_loaders import UnstructuredURLLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import FAISS
-from langchain.memory import ConversationBufferMemory
+from langchain.memory import ConversationSummaryBufferMemory
 from langchain import PromptTemplate
 from langchain.chains import RetrievalQA, ConversationalRetrievalChain
-from langchain.retrievers import WikipediaRetriever
+from langchain.retrievers import WikipediaRetriever, ContextualCompressionRetriever
+from langchain.document_transformers import (
+    EmbeddingsRedundantFilter,
+    EmbeddingsClusteringFilter,
+    LongContextReorder
+)
+from langchain.retrievers.document_compressors import DocumentCompressorPipeline
 
 
 DEFAULT_PROMPT_TEMPLATE = """The following is a conversation between a human and an AI Assistant. The Assistant is talkative and provides lots of specific details from its context. If the Assistant does not know the answer to a question, it truthfully says it does not know.
@@ -46,7 +52,7 @@ class Gerty:
         self.prompt_variables = prompt_variables
         self.conversational = conversational
         self.retrievers = []
-        self.merger_retriever = None
+        self.final_retriever = None
 
     def get_prompt(self):
         return PromptTemplate(
@@ -63,19 +69,37 @@ class Gerty:
         return self.__get_retrieval_model(chain_type_kwargs)
 
     def __get_retrievers__(self):
-        if len(self.retrievers) == 0 or self.merger_retriever is None:
+        if len(self.retrievers) == 0 or self.final_retriever is None:
             self.retrievers = []
             self.retrievers.append( self.db.as_retriever() )
-            #self.retrievers.append( WikipediaRetriever() )
-            self.merger_retriever = MergerRetriever(
+            #self.retrievers.append( WikipediaRetriever(load_max_docs=1) )
+            merger_retriever = MergerRetriever(
                 retrievers = self.retrievers
             )
-        return self.merger_retriever 
+            #cluster_filter = EmbeddingsClusteringFilter(
+            #    embeddings=self.embedding_model,
+            #    num_clusters = 10,
+            #    num_closest = 4
+            #)
+            #reordering = LongContextReorder()
+            #filter_pipeline = DocumentCompressorPipeline(transformers=[cluster_filter, reordering])
+            #compression_retriever = ContextualCompressionRetriever(
+            #    base_compressor = filter_pipeline,
+            #    base_retriever = merger_retriever
+            #)
+            self.final_retriever = merger_retriever #compression_retriever
+        return self.final_retriever 
 
     
     def __get_conversational_model(self, chain_type_kwargs, memory = None):
         if memory is None:
-            memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+            memory = ConversationSummaryBufferMemory(
+                llm = self.language_model,
+                memory_key="chat_history",
+                ai_prefix="Assistant",
+                return_messages=True,
+                max_token_limit=512,
+            )
         return ConversationalRetrievalChain.from_llm(
             llm = self.language_model,
             retriever = self.__get_retrievers__(),

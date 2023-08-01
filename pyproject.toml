@@ -25,6 +25,7 @@ sqlalchemy = "^2.0.19"
 apscheduler = "^3.10.1"
 flask-apscheduler = "^1.12.4"
 rq = "^1.15.1"
+scikit-learn = "^1.3.0"
 
 [tool.poetry.scripts]
 gendb = "gerty.embed_db:run"

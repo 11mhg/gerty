@@ -3,7 +3,7 @@ from rq.local import LocalStack
 from rq.worker import SimpleWorker
 from langchain.chains import ConversationalRetrievalChain, RetrievalQA
 from langchain.chains.base import Chain
-from langchain.memory import ConversationBufferMemory
+from langchain.memory import ConversationSummaryBufferMemory
 from langchain.schema import messages_from_dict, messages_to_dict
 from langchain.memory.chat_message_histories.in_memory import ChatMessageHistory
 
@@ -20,15 +20,26 @@ def serialize_memory(chain: Chain) -> str :
     messages = messages_to_dict(messages)
     return json.dumps( messages )
 
-def deserialize_memory(messages_str: Optional[str]) -> ConversationBufferMemory:
+def deserialize_memory(messages_str: Optional[str], llm) -> ConversationSummaryBufferMemory:
     if messages_str is None or len(messages_str) == 0:
-        return ConversationBufferMemory(memory_key="chat_history", return_messages = True)
+        return ConversationSummaryBufferMemory(
+            llm = llm,
+            memory_key="chat_history", 
+            ai_prefix="Assistant",
+            return_messages = True,
+            max_token_limit=512,
+        )
     messages = json.loads( messages_str )
     messages = messages_from_dict( messages )
     retrieved_chat_history = ChatMessageHistory(messages=messages)
-    return ConversationBufferMemory(memory_key="chat_history", 
-                                    chat_memory = retrieved_chat_history, 
-                                    return_messages=True)
+    return ConversationSummaryBufferMemory(
+        llm = llm, 
+        memory_key="chat_history",
+        ai_prefix="Assistant",
+        chat_memory = retrieved_chat_history, 
+        return_messages=True,
+        max_token_limit=512,
+    )
 class GertyWorker(SimpleWorker):
     """
     A simple gerty worker that initializes gerty and gets it ready for use/reuse.
@@ -47,7 +58,8 @@ class GertyWorker(SimpleWorker):
 def query_job(messages, query, qa):
     print("Messages: ", messages)
     print("query: ", query)
-    memory = deserialize_memory( messages )
+    llm = qa.question_generator.llm
+    memory = deserialize_memory( messages, llm )
     qa.memory = memory
     response = qa.run( query )
     return {
