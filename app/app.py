@@ -3,6 +3,7 @@ from .tasks import start_tasks
 from .db import create_all
 from .api import init_api
 from flask import Flask
+from flask_cors import CORS
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_apscheduler import APScheduler
@@ -17,7 +18,7 @@ def init_configuration(app: Flask) -> None:
 def create_app() -> Flask:
     db: SQLAlchemy = SQLAlchemy() 
     app: Flask = Flask('gerty-rest', instance_relative_config=True)
-    
+    CORS(app) 
     init_configuration(app)
 
     #os.makedirs(app.config['SESSION_FILE_DIR'], exist_ok=True)

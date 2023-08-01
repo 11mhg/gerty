@@ -6,7 +6,7 @@ DEBUG=False
 KB_DB= os.path.abspath(os.path.join( os.path.dirname( __file__ ), '..', 'test-db' ))
 CONTEXT_LENGTH=2048
 
-
+SESSION_COOKIE_SECURE = True
 SESSION_TYPE='sqlalchemy'
 SESSION_RESTART_PERSIST=False
 PERMANENT_SESSION_LIFETIME = datetime.timedelta(hours = 24)
