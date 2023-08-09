@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte/internal';
   import axios from 'axios';
+
+  axios.defaults.withCredentials = true;
   
   interface Session {
     id: string;
@@ -22,7 +24,7 @@
   let currentMessage = '';
   let waiting = false;
   let session: Session = { id: '' };
-  let apiURL = 'http://localhost:8080'
+  let apiURL = 'http://192.168.0.100:8888' //'127.0.0.1:8888'; //'http://127-0-0-1.nip.io:8888';
 
   async function resetChat(){
     console.log("Resetting chat!");
@@ -40,7 +42,7 @@
     if (is_human && currentMessage.length == 0) {
       return;
     };
-    name = "Assistant";
+    let name = "Gerty";
     if (is_human) {
       name = "Human";
     };
@@ -56,7 +58,7 @@
     setTimeout(async ()=>{
       waiting = true;
       scrollChatBottom();
-      await queryLLM();
+      await queryLLM(newMessage.message);
       waiting = false;
     }, 0);
   }
@@ -72,39 +74,61 @@
     scrollChatBottom();
   });
 
-  async function initializeSession() {
+  async function initializeSession(): Promise<void> {
     try {
-      //const res = await axios.get( `${apiURL}/api/login`, { withCredentials: true } );
-      //console.log(res);
-      const resfetch = await fetch( `${apiURL}/api/login`, { credentials: 'include' } );
-
-      console.log(resfetch);
+      const loginRes = await axios.get( `${apiURL}/api/login`);
+      const sessRes = await axios.get( `${apiURL}/api/`);
+      session.id = sessRes.data;
     } catch(err) {
-
+      alert("Could not initialize Session! Refresh");
     };
   };
 
-  async function queryLLM(message: string): void {
+  async function queryLLM(message: string): Promise<void> {
     if (session.id === ''){
       await initializeSession();
     };
-    await new Promise((res)=>{
-      setTimeout(res, 5*1000);
-    });
+    
+    let assistantMessage: MessageFeed = {
+      name: "Gerty",
+      message: ".",
+      color: "",
+    };
+
+    let messageIntervalRun = setInterval(()=>{
+      if (assistantMessage.message.length >= 5) {
+        assistantMessage.message = ".";
+      } else {
+        assistantMessage.message = assistantMessage.message + ".";
+      };
+      messageFeed[messageFeed.length-1] = assistantMessage;
+      messageFeed = messageFeed;
+    },500);
+    
+    messageFeed.push(assistantMessage);
+    messageFeed = messageFeed;
+    const modelQueryRes = await axios.post(`${apiURL}/api/query`,
+      { query: message }
+    );
+    clearInterval(messageIntervalRun);
+
+    assistantMessage.message = modelQueryRes.data;
+    messageFeed[messageFeed.length-1] = assistantMessage;
+    messageFeed = messageFeed;
   }
 
 </script>
 
 <!-- Chat -->
-<section class="card">
-<div class="chat w-full h-full grid grid-cols-1 lg:grid-cols-[30%_1fr]">
-  <div class="hidden lg:grid grid-rows-[auto_1fr_auto] border-r border-surface-500/30">
+<section class="card sm:min-w-[500px] sm:max-w-[700px]">
+<div class="chat w-full h-full grid grid-cols-1 sm:grid-cols-[30%_1fr]">
+  <div class="hidden sm:grid grid-rows-[auto_1fr_auto] border-r border-surface-500/30">
     <header class="border-b border-surface-500/30 p-4">
       <button type="button" class="btn variant-filled" on:click={resetChat}>Reset Chat</button>
 		</header>
   </div>
   <div class="grid grid-row-[1fr_auto]">
-    <section bind:this={elemChat} class="max-h-[500px] p-4 overflow-y-auto space-y-4">
+    <section bind:this={elemChat} class="min-h-[250px] max-h-[500px] p-4 overflow-y-auto space-y-4">
       {#each messageFeed as bubble}
         {#if bubble.name === "Human" }
 				  <div class="grid grid-cols-[1fr_auto] gap-2">
@@ -112,16 +136,16 @@
 				  		<header class="flex justify-between items-center">
 				  			<p class="font-bold">{bubble.name}</p>
 				  		</header>
-				  		<p>{bubble.message}</p>
+				  		<p class="break-all text-left">{bubble.message}</p>
 				  	</div>
 				  </div>       
         {:else}
 				  <div class="grid grid-cols-[1fr_auto] gap-2">
-				  	<div class="card p-4 rounded-tr-none space-y-2 {bubble.color}">
+				  	<div class="card p-4 rounded-tr-none space-y-2 {bubble.color} break-words">
 				  		<header class="flex justify-between items-center">
 				  			<p class="font-bold">{bubble.name}</p>
 				  		</header>
-				  		<p>{bubble.message}</p>
+				  		<p class="break-all text-left">{bubble.message}</p>
 				  	</div>
 				  </div>      
         {/if}

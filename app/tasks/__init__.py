@@ -21,14 +21,17 @@ def start_tasks(app: Flask, db: SQLAlchemy) -> APScheduler:
 
     @scheduler.task('interval', id='do_cleanup_job', seconds = 60, misfire_grace_time=1800)
     def cleanup_job():
-        too_old = datetime.utcnow() - app.config['PERMANENT_SESSION_LIFETIME']
-        with engine.connect() as conn:
-            out = conn.execute(
-                conversation_table.delete().where(
-                    conversation_table.c.timestamp <= too_old
+        try:
+            too_old = datetime.utcnow() - app.config['PERMANENT_SESSION_LIFETIME']
+            with engine.begin() as conn:
+                out = conn.execute(
+                    conversation_table.delete().where(
+                        conversation_table.c.timestamp <= too_old
+                    )
                 )
-            )
-            print(f"Cleaned up {out.rowcount} rows.")
+                print(f"Cleaned up {out.rowcount} rows.")
+        except Exception as e:
+            print("TASK ERROR: ", e)
         return
 
     scheduler.start()

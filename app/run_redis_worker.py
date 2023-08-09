@@ -61,7 +61,7 @@ def query_job(messages, query, qa):
     llm = qa.question_generator.llm
     memory = deserialize_memory( messages, llm )
     qa.memory = memory
-    response = qa.run( query )
+    response = qa.run( query ).strip()
     return {
         'response': response,
         'messages': serialize_memory(qa)

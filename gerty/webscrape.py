@@ -3,8 +3,8 @@ import requests
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup, SoupStrainer
 
-def scrape_site(URL, visited = []):
 
+def scrape_site(URL, visited=[]):
     if URL in visited:
         return visited
     page = requests.get(URL)
@@ -13,16 +13,18 @@ def scrape_site(URL, visited = []):
         return visited
 
     visited.append(URL)
-    
-    for link in BeautifulSoup(page.content, 'html.parser', parse_only=SoupStrainer('a')):
-        if link.has_attr('href') and \
-                ('http' not in link['href']) and \
-                ('mailto' not in link['href']) and \
-                (link['href'] not in visited):
-            link_href = link['href'].split('#')[0]
+
+    for link in BeautifulSoup(
+        page.content, "html.parser", parse_only=SoupStrainer("a")
+    ):
+        if (
+            link.has_attr("href")
+            and ("http" not in link["href"])
+            and ("mailto" not in link["href"])
+            and (link["href"] not in visited)
+        ):
+            link_href = link["href"].split("#")[0]
             to_visit = urljoin(URL, link_href)
             visited = scrape_site(to_visit, visited)
 
     return visited
-
-

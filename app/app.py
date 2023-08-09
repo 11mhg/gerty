@@ -18,8 +18,8 @@ def init_configuration(app: Flask) -> None:
 def create_app() -> Flask:
     db: SQLAlchemy = SQLAlchemy() 
     app: Flask = Flask('gerty-rest', instance_relative_config=True)
-    CORS(app) 
     init_configuration(app)
+    CORS(app, supports_credentials = True) 
 
     #os.makedirs(app.config['SESSION_FILE_DIR'], exist_ok=True)
     #if os.path.exists(app.config['SESSION_FILE_DIR']) and not app.config['SESSION_RESTART_PERSIST']:
