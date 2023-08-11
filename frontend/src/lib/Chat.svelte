@@ -24,7 +24,7 @@
   let currentMessage = '';
   let waiting = false;
   let session: Session = { id: '' };
-  let apiURL = 'http://192.168.0.100:8888' //'127.0.0.1:8888'; //'http://127-0-0-1.nip.io:8888';
+  let apiURL = 'http://192.168.5.24:8888' //'127.0.0.1:8888'; //'http://127-0-0-1.nip.io:8888';
 
   async function resetChat(){
     console.log("Resetting chat!");

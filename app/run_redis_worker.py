@@ -16,6 +16,14 @@ from gerty.gerty import Gerty
 from gerty.embed_db import valid_path
 from typing import Union, Optional
 
+from rq.logutils import blue, green, yellow
+from rq.connections import pop_connection, push_connection
+from rq.utils import as_text, utcnow
+from rq.timeouts import JobTimeoutException
+import traceback 
+import sys
+
+
 def extract_memory(chain):
     return chain.memory.chat_memory.messages
 
@@ -60,6 +68,82 @@ class GertyWorker(SimpleWorker):
     def execute_job(self, job, queue):
         job.args = (*job.args, self.__qa)
         return self.perform_job(job, queue)
+
+    def perform_job(self, job, queue) -> bool:
+        """Performs the actual work of a job.  Will/should only be called
+        inside the work horse's process.
+
+        Args:
+            job (Job): The Job
+            queue (Queue): The Queue
+
+        Returns:
+            bool: True after finished.
+        """
+        push_connection(self.connection)
+        started_job_registry = queue.started_job_registry
+        self.log.debug('Started Job Registry set.')
+
+        try:
+            remove_from_intermediate_queue = len(self.queues) == 1
+            self.prepare_job_execution(job, remove_from_intermediate_queue)
+
+            job.started_at = utcnow()
+            timeout = job.timeout or self.queue_class.DEFAULT_TIMEOUT
+            with self.death_penalty_class(timeout, JobTimeoutException, job_id=job.id):
+                self.log.debug('Performing Job...')
+                rv = job._execute()
+                self.log.debug('Finished performing Job ID %s', job.id)
+
+            job.ended_at = utcnow()
+
+            # Pickle the result in the same try-except block since we need
+            # to use the same exc handling when pickling fails
+            job._result = rv
+            job.args = job.args[:len(job.args)-1] 
+            job.heartbeat(utcnow(), job.success_callback_timeout)
+            job.execute_success_callback(self.death_penalty_class, rv)
+
+            self.handle_job_success(job=job, queue=queue, started_job_registry=started_job_registry)
+        except:  # NOQA
+            job.args = job.args[:len(job.args)-1]
+            self.log.debug('Job %s raised an exception.', job.id)
+            job.ended_at = utcnow()
+            exc_info = sys.exc_info()
+            exc_string = ''.join(traceback.format_exception(*exc_info))
+
+            try:
+                job.heartbeat(utcnow(), job.failure_callback_timeout)
+                job.execute_failure_callback(self.death_penalty_class, *exc_info)
+            except:  # noqa
+                exc_info = sys.exc_info()
+                exc_string = ''.join(traceback.format_exception(*exc_info))
+
+            self.handle_job_failure(
+                job=job, exc_string=exc_string, queue=queue, started_job_registry=started_job_registry
+            )
+            self.handle_exception(job, *exc_info)
+            return False
+
+        finally:
+            pop_connection()
+
+        self.log.info('%s: %s (%s)', green(job.origin), blue('Job OK'), job.id)
+        if rv is not None:
+            self.log.debug('Result: %r', yellow(as_text(str(rv))))
+
+        if self.log_result_lifespan:
+            result_ttl = job.get_result_ttl(self.default_result_ttl)
+            if result_ttl == 0:
+                self.log.info('Result discarded immediately')
+            elif result_ttl > 0:
+                self.log.info('Result is kept for %s seconds', result_ttl)
+            else:
+                self.log.info('Result will never expire, clean up result key manually')
+
+        return True
+
+
 
 def query_job(messages, query, qa):
     print("Messages: ", messages)

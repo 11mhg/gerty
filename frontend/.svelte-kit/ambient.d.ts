@@ -34,7 +34,6 @@ declare module '$env/static/private' {
 	export const NV_CUDA_COMPAT_PACKAGE: string;
 	export const npm_config_user_agent: string;
 	export const HOSTNAME: string;
-	export const TFDS_DATA_DIR: string;
 	export const npm_node_execpath: string;
 	export const SHLVL: string;
 	export const LD_LIBRARY_PATH: string;
@@ -78,7 +77,6 @@ declare module '$env/static/private' {
 	export const npm_package_name: string;
 	export const NV_LIBNCCL_DEV_PACKAGE_NAME: string;
 	export const NV_LIBCUSPARSE_DEV_VERSION: string;
-	export const DISPLAY: string;
 	export const NV_LIBNCCL_PACKAGE: string;
 	export const NVIDIA_PRODUCT_NAME: string;
 	export const NV_CUDA_CUDART_DEV_VERSION: string;
@@ -143,7 +141,6 @@ declare module '$env/dynamic/private' {
 		NV_CUDA_COMPAT_PACKAGE: string;
 		npm_config_user_agent: string;
 		HOSTNAME: string;
-		TFDS_DATA_DIR: string;
 		npm_node_execpath: string;
 		SHLVL: string;
 		LD_LIBRARY_PATH: string;
@@ -187,7 +184,6 @@ declare module '$env/dynamic/private' {
 		npm_package_name: string;
 		NV_LIBNCCL_DEV_PACKAGE_NAME: string;
 		NV_LIBCUSPARSE_DEV_VERSION: string;
-		DISPLAY: string;
 		NV_LIBNCCL_PACKAGE: string;
 		NVIDIA_PRODUCT_NAME: string;
 		NV_CUDA_CUDART_DEV_VERSION: string;
