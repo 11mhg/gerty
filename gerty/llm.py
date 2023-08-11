@@ -9,7 +9,10 @@ from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
 MODEL_PATH = os.path.realpath(
     os.path.join(
-        os.path.dirname(__file__), "models", "nous-hermes-llama-2-7b", "ggml-model-q4_k.bin"  #"llama-7b-chat", "ggml-model-q4_0.bin"
+        os.path.dirname(__file__),
+        "models",
+        "nous-hermes-llama-2-7b",
+        "ggml-model-q4_k.bin",  # "llama-7b-chat", "ggml-model-q4_0.bin"
     )
 )
 
@@ -25,7 +28,7 @@ def get_model(n_ctx=2048, callback_manager: Optional[CallbackManager] = None):
         n_gpu_layers=n_gpu_layers,
         n_batch=n_batch,
         callback_manager=callback_manager,
-        stop= ["###", "\n\n", "EXAMPLE"], #["Human:", "\n\n"],
+        stop=["###", "\n\n", "EXAMPLE"],  # ["Human:", "\n\n"],
         n_ctx=n_ctx,
         f16_kv=True,
         verbose=False,

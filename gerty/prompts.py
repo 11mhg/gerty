@@ -12,12 +12,12 @@ Summarize the following text.
 ### Response:
 """
 
-DEFAULT_CONVO_SUMMARY_VARIABLES=["summary", "new_lines"]
+DEFAULT_CONVO_SUMMARY_VARIABLES = ["summary", "new_lines"]
 
 
 DEFAULT_CONDENSE_QUESTION_TEMPLATE: str = """"""
 
-DEFAULT_CONDENSE_QUESTION_VARIABLES=["question", "chat_history"]
+DEFAULT_CONDENSE_QUESTION_VARIABLES = ["question", "chat_history"]
 
 DEFAULT_PROMPT_TEMPLATE = """"### Instruction:
 Role play as a character that is described in the following lines. You always stay in character.
@@ -41,6 +41,3 @@ Respond to the following message as your character would:
 Gerty: """
 
 DEFAULT_PROMPT_VARIABLES = ["question", "context", "chat_history"]
-
-
-

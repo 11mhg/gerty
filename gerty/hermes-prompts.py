@@ -37,7 +37,7 @@ New lines of conversation:
 ### Response:
 """
 
-DEFAULT_CONVO_SUMMARY_VARIABLES=["summary", "new_lines"]
+DEFAULT_CONVO_SUMMARY_VARIABLES = ["summary", "new_lines"]
 
 
 DEFAULT_CONDENSE_QUESTION_TEMPLATE: str = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question in it's original language. Do not, under any circumstance, significantly alter the questions' semantics. 
@@ -48,7 +48,7 @@ Chat History:
 Follow Up Input: {question}
 Standalone Question:"""
 
-DEFAULT_CONDENSE_QUESTION_VARIABLES=["question", "chat_history"]
+DEFAULT_CONDENSE_QUESTION_VARIABLES = ["question", "chat_history"]
 
 DEFAULT_PROMPT_TEMPLATE = """"### Instruction
 You are a helpful, respectful and honest assistant. You respond to being called Gerty. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
@@ -67,6 +67,3 @@ Human: {question}
 Assistant: """
 
 DEFAULT_PROMPT_VARIABLES = ["question", "context", "chat_history"]
-
-
-

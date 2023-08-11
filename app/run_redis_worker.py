@@ -6,7 +6,11 @@ from langchain.chains.base import Chain
 from langchain.memory import ConversationSummaryBufferMemory
 from langchain.schema import messages_from_dict, messages_to_dict
 from langchain.memory.chat_message_histories.in_memory import ChatMessageHistory
-
+from gerty.prompts import (
+    DEFAULT_CONVO_SUMMARY_TEMPLATE,
+    DEFAULT_CONVO_SUMMARY_VARIABLES
+)
+from langchain import PromptTemplate
 import argparse, json, os
 from gerty.gerty import Gerty
 from gerty.embed_db import valid_path
@@ -39,6 +43,8 @@ def deserialize_memory(messages_str: Optional[str], llm) -> ConversationSummaryB
         chat_memory = retrieved_chat_history, 
         return_messages=True,
         max_token_limit=512,
+        prompt=PromptTemplate(input_variables = DEFAULT_CONVO_SUMMARY_VARIABLES,
+                              template = DEFAULT_CONVO_SUMMARY_TEMPLATE ),
     )
 class GertyWorker(SimpleWorker):
     """

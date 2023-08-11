@@ -29,16 +29,15 @@ def run():
 
     print("Gerty Loaded!")
 
-    #agent_executor = gerty.get_agent()
+    # agent_executor = gerty.get_agent()
 
-    #print("Agent loaded!")
-    #while True:
+    # print("Agent loaded!")
+    # while True:
     #    query = input("Human: ")
     #    start = time.time()
     #    answer = agent_executor({"input": query })
     #    end = time.time()
     #    print(f"{end - start} seconds - Assistant: ", answer )
-
 
     qa = gerty.get_qa_model()
 
