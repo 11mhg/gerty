@@ -76,16 +76,20 @@ class Gerty:
         if len(self.retrievers) == 0 or self.final_retriever is None:
             self.retrievers = []
 
+            #db_retriever = self.db.as_retriever(
+            #    search_type="similarity_score_threshold",
+            #    search_kwargs={"score_threshold": 0.5},
+            #)
             db_retriever = self.db.as_retriever(
-                search_type="similarity_score_threshold", search_kwargs={"score_threshold": .5}
-            ) 
-            #SelfQueryRetriever.from_llm(
+                search_type="mmr"
+            )
+            # SelfQueryRetriever.from_llm(
             #    llm=self.language_model,
             #    vectorstore=self.db,
             #    document_contents="Information about the distributed compute protocol (DCP) and it's javascript api/spec",
             #    metadata_field_info=None,
             #    verbose=True,
-            #)
+            # )
 
             self.retrievers.append(db_retriever)
             # self.retrievers.append(WikipediaRetriever(load_max_docs=1))
@@ -115,7 +119,7 @@ class Gerty:
             memory = ConversationSummaryBufferMemory(
                 llm=self.language_model,
                 memory_key="chat_history",
-                ai_prefix="Assistant",
+                ai_prefix= "Assistant",
                 return_messages=True,
                 max_token_limit=512,
                 prompt=PromptTemplate(
@@ -163,21 +167,18 @@ class Gerty:
         )
         docs = text_splitter.split_documents(documents)
 
-        #self.db = FAISS.from_documents(docs, self.embedding_model)
+        # self.db = FAISS.from_documents(docs, self.embedding_model)
         db_name = input("What is the name of this db? ")
         db_name = db_name.replace("\n", "").replace(" ", "-")
         if cache_dir:
             self.db_cache_dir = cache_dir
-            #db_description = input(
+            # db_description = input(
             #    "What is the description of this dataset? When should it be used? "
-            #)
+            # )
         self.db = Qdrant.from_documents(
-            docs,
-            self.embedding_model,
-            path=self.db_cache_dir,
-            collection_name = db_name 
+            docs, self.embedding_model, path=self.db_cache_dir, collection_name=db_name
         )
-        
+
         return
 
     def load_db(self, cache_dir=None):
@@ -185,17 +186,18 @@ class Gerty:
             self.db_cache_dir = cache_dir
             # with open(os.path.join(self.db_cache_dir, "config.toml"), 'r') as f:
             #    self.db_config = toml.loads("".join(f.readlines()))
-        #self.db = FAISS.load_local(self.db_cache_dir, self.embedding_model)
+        # self.db = FAISS.load_local(self.db_cache_dir, self.embedding_model)
         import qdrant_client
+
         client = qdrant_client.QdrantClient(
             path=self.db_cache_dir,
         )
         db_name = input("What is the name of this db? ")
         db_name = db_name.replace("\n", "").replace(" ", "-")
         self.db = Qdrant(
-            client = client,
-            collection_name = db_name,
-            embeddings = self.embedding_model,
+            client=client,
+            collection_name=db_name,
+            embeddings=self.embedding_model,
         )
         return
 

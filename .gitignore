@@ -11,3 +11,4 @@ flask_session
 !.vscode/launch.json
 node_modules
 .eslintcache
+.cache

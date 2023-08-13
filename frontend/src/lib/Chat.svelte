@@ -120,7 +120,7 @@
 </script>
 
 <!-- Chat -->
-<section class="card sm:min-w-[500px] sm:max-w-[700px]">
+<section class="card sm:min-w-[500px]">
 <div class="chat w-full h-full grid grid-cols-1 sm:grid-cols-[30%_1fr]">
   <div class="hidden sm:grid grid-rows-[auto_1fr_auto] border-r border-surface-500/30">
     <header class="border-b border-surface-500/30 p-4">

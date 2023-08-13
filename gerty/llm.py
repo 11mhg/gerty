@@ -28,12 +28,12 @@ def get_model(n_ctx=2048, callback_manager: Optional[CallbackManager] = None):
         n_gpu_layers=n_gpu_layers,
         n_batch=n_batch,
         callback_manager=callback_manager,
-        stop=["###", "\n\n", "EXAMPLE"],  # ["Human:", "\n\n"],
+        stop=["\n###", "Human:"],  # ["Human:", "\n\n"],
         n_ctx=n_ctx,
         f16_kv=True,
         verbose=False,
     )
-
+    llm.client.verbose = False
     return llm
 
 
