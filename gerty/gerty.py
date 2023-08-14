@@ -2,14 +2,6 @@ import os, sys, json
 from .embedding import get_embeddings
 from .llm import get_model
 from .webscrape import scrape_site
-from .prompts import (
-    DEFAULT_CONDENSE_QUESTION_TEMPLATE,
-    DEFAULT_CONDENSE_QUESTION_VARIABLES,
-    DEFAULT_CONVO_SUMMARY_TEMPLATE,
-    DEFAULT_CONVO_SUMMARY_VARIABLES,
-    DEFAULT_PROMPT_TEMPLATE,
-    DEFAULT_PROMPT_VARIABLES,
-)
 from typing import List
 from langchain.document_loaders import DirectoryLoader
 from langchain.document_loaders.merge import MergedDataLoader
@@ -35,22 +27,30 @@ from langchain.chains.question_answering import load_qa_chain
 from langchain.retrievers import WikipediaRetriever
 from langchain.retrievers import BM25Retriever, EnsembleRetriever
 from langchain.vectorstores.utils import DistanceStrategy
+from .utils import import_from_path
 
 
 class Gerty:
     def __init__(
         self,
         n_ctx: int = 2048,
-        prompt_template: str = DEFAULT_PROMPT_TEMPLATE,
-        prompt_variables: List[str] = DEFAULT_PROMPT_VARIABLES,
+        model_path: str = os.path.join(
+            os.path.dirname(__file__), "models", "nous-hermes-llama-2-7b"
+        ),
     ):
         self.n_ctx = n_ctx
+        self.model_path = os.path.realpath(model_path)
 
-        self.embedding_model = get_embeddings(n_ctx=self.n_ctx)
-        self.language_model = get_model(n_ctx=self.n_ctx)
+        self.embedding_model = get_embeddings(model_path=model_path, n_ctx=self.n_ctx)
+        self.language_model = get_model(model_path=model_path, n_ctx=self.n_ctx)
 
-        self.prompt_template = prompt_template
-        self.prompt_variables = prompt_variables
+        self.prompts_import = import_from_path(
+            os.path.realpath(os.path.join(self.model_path, "prompts.py")),
+            "prompts"
+        )
+
+        self.prompt_template = self.prompts_import.DEFAULT_PROMPT_TEMPLATE
+        self.prompt_variables = self.prompts_import.DEFAULT_PROMPT_VARIABLES
         self.retrievers = []
         self.tools = None
         self.final_retriever = None
@@ -76,13 +76,11 @@ class Gerty:
         if len(self.retrievers) == 0 or self.final_retriever is None:
             self.retrievers = []
 
-            #db_retriever = self.db.as_retriever(
+            # db_retriever = self.db.as_retriever(
             #    search_type="similarity_score_threshold",
             #    search_kwargs={"score_threshold": 0.5},
-            #)
-            db_retriever = self.db.as_retriever(
-                search_type="mmr"
-            )
+            # )
+            db_retriever = self.db.as_retriever(search_type="mmr")
             # SelfQueryRetriever.from_llm(
             #    llm=self.language_model,
             #    vectorstore=self.db,
@@ -119,12 +117,12 @@ class Gerty:
             memory = ConversationSummaryBufferMemory(
                 llm=self.language_model,
                 memory_key="chat_history",
-                ai_prefix= "Assistant",
+                ai_prefix="Gerty",
                 return_messages=True,
-                max_token_limit=512,
+                max_token_limit=1024,
                 prompt=PromptTemplate(
-                    input_variables=DEFAULT_CONVO_SUMMARY_VARIABLES,
-                    template=DEFAULT_CONVO_SUMMARY_TEMPLATE,
+                    input_variables=self.prompts_import.DEFAULT_CONVO_SUMMARY_VARIABLES,
+                    template=self.prompts_import.DEFAULT_CONVO_SUMMARY_TEMPLATE,
                 ),
             )
         doc_chain = load_qa_chain(
@@ -167,14 +165,10 @@ class Gerty:
         )
         docs = text_splitter.split_documents(documents)
 
-        # self.db = FAISS.from_documents(docs, self.embedding_model)
         db_name = input("What is the name of this db? ")
         db_name = db_name.replace("\n", "").replace(" ", "-")
         if cache_dir:
             self.db_cache_dir = cache_dir
-            # db_description = input(
-            #    "What is the description of this dataset? When should it be used? "
-            # )
         self.db = Qdrant.from_documents(
             docs, self.embedding_model, path=self.db_cache_dir, collection_name=db_name
         )
@@ -184,9 +178,6 @@ class Gerty:
     def load_db(self, cache_dir=None):
         if cache_dir:
             self.db_cache_dir = cache_dir
-            # with open(os.path.join(self.db_cache_dir, "config.toml"), 'r') as f:
-            #    self.db_config = toml.loads("".join(f.readlines()))
-        # self.db = FAISS.load_local(self.db_cache_dir, self.embedding_model)
         import qdrant_client
 
         client = qdrant_client.QdrantClient(

@@ -19,10 +19,22 @@ def run():
         default=2048,
         help="Context length to load the LLama embedding model with",
     )
+    parser.add_argument(
+        "--model_path",
+        type=valid_path,
+        default=os.path.join(
+            os.path.dirname(__file__),
+            "models",
+            "nous-hermes-llama-2-7b"
+        ),
+        help="Path to model directory."
+    )
+        
 
     args = parser.parse_args()
 
     gerty = Gerty(
+        model_path = args.model_path,
         n_ctx=args.context_length,
     )
     gerty.load_db(args.database)

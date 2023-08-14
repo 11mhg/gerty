@@ -1,16 +1,30 @@
 import os, sys
 import requests
-from urllib.parse import urljoin
+from typing import List
+from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup, SoupStrainer
 
 
-def scrape_site(URL, visited=[]):
+def scrape_site(URL: str, visited: List[str] = []):
+    """
+    Given a url and a list of already visited urls, does a depth first search of all
+    URLs given.
+
+    Args:
+        URL (str): URL String to parse for links.
+        visited ():
+
+    Returns:
+
+    """
     if URL in visited:
         return visited
     page = requests.get(URL)
 
     if page.status_code != 200:
         return visited
+
+    domain = urlparse(URL).netloc
 
     visited.append(URL)
 
