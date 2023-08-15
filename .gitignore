@@ -12,3 +12,8 @@ flask_session
 node_modules
 .eslintcache
 .cache
+vite.config.js.timestamp-*
+.vercel_build_output
+.svelte-kit
+symlink-from
+.idea/

@@ -6,16 +6,12 @@ from langchain.chains.base import Chain
 from langchain.memory import ConversationSummaryBufferMemory
 from langchain.schema import messages_from_dict, messages_to_dict
 from langchain.memory.chat_message_histories.in_memory import ChatMessageHistory
-from gerty.prompts import (
-    DEFAULT_CONVO_SUMMARY_TEMPLATE,
-    DEFAULT_CONVO_SUMMARY_VARIABLES
-)
 from langchain import PromptTemplate
 import argparse, json, os
 from gerty.gerty import Gerty
 from gerty.embed_db import valid_path
 from typing import Union, Optional
-
+from gerty.utils import import_from_path 
 from rq.logutils import blue, green, yellow
 from rq.connections import pop_connection, push_connection
 from rq.utils import as_text, utcnow
@@ -44,6 +40,16 @@ def deserialize_memory(messages_str: Optional[str], llm) -> ConversationSummaryB
     messages = json.loads( messages_str )
     messages = messages_from_dict( messages )
     retrieved_chat_history = ChatMessageHistory(messages=messages)
+    prompts = import_from_path(os.path.realpath(
+        os.path.join(
+            os.path.dirname(__file__),
+            '..',
+            'gerty',
+            'models',
+            'nous-hermes-llama-2-7b',
+            'prompts.py'
+        )
+    ), 'prompts')
     return ConversationSummaryBufferMemory(
         llm = llm, 
         memory_key="chat_history",
@@ -51,8 +57,8 @@ def deserialize_memory(messages_str: Optional[str], llm) -> ConversationSummaryB
         chat_memory = retrieved_chat_history, 
         return_messages=True,
         max_token_limit=512,
-        prompt=PromptTemplate(input_variables = DEFAULT_CONVO_SUMMARY_VARIABLES,
-                              template = DEFAULT_CONVO_SUMMARY_TEMPLATE ),
+        prompt=PromptTemplate(input_variables = prompts.DEFAULT_CONVO_SUMMARY_VARIABLES,
+                              template = prompts.DEFAULT_CONVO_SUMMARY_TEMPLATE ),
     )
 class GertyWorker(SimpleWorker):
     """
