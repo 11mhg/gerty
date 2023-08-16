@@ -64,8 +64,8 @@ class GertyWorker(SimpleWorker):
     """
     A simple gerty worker that initializes gerty and gets it ready for use/reuse.
     """
-    def __init__(self, queues, n_ctx, db, *args, **kwargs):
-        self.__gerty: Gerty = Gerty(n_ctx = n_ctx)
+    def __init__(self, queues, n_ctx, db, model_path, *args, **kwargs):
+        self.__gerty: Gerty = Gerty(n_ctx = n_ctx, model_path = model_path)
         self.__gerty.load_db( db )
         self.__qa = self.__gerty.get_qa_model()
         super(SimpleWorker, self).__init__(queues = queues, *args, **kwargs)
@@ -169,8 +169,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Launch redis based gerty worker.")
     parser.add_argument("-db", "--database", type=valid_path, help="Cache with knowledge base")
     parser.add_argument("--context-length", type=int, default=2048, help = "Context length")
+    parser.add_argument("--model_path", type=str, default = os.path.join(
+            os.path.dirname(__file__),
+            "models",
+            "nous-hermes-llama-2-7b"
+        ), help = "Path to model directory."
+    )
     args = parser.parse_args()
 
     with Connection():
-        worker = GertyWorker(queues = ['default'], n_ctx = args.context_length, db = args.database )
+        worker = GertyWorker(queues = ['default'], 
+            n_ctx = args.context_length, 
+            db = args.database, 
+            model_path = args.model_path 
+        )
         worker.work()
