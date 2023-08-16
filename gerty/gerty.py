@@ -97,7 +97,7 @@ class Gerty:
             )
             # MergerRetriever(retrievers=self.retrievers)
             embeddings_filter = EmbeddingsFilter(
-                embeddings=self.embedding_model, similarity_threshold=0.6
+                embeddings=self.embedding_model, similarity_threshold=0.76
             )
             # reordering = LongContextReorder()
             compressor = LLMChainExtractor.from_llm(self.language_model)

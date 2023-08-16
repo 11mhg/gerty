@@ -36,6 +36,6 @@ Chat History:
 Human: {question}
 
 ### Response:
-"""
+Gerty: """
 
 DEFAULT_PROMPT_VARIABLES = ["question", "context", "chat_history"]

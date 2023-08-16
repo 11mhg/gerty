@@ -6,6 +6,7 @@ from langchain.embeddings import (
     HuggingFaceEmbeddings,
     SentenceTransformerEmbeddings,
 )
+from langchain.embeddings import HuggingFaceBgeEmbeddings
 
 
 def get_embeddings(
@@ -17,22 +18,29 @@ def get_embeddings(
     n_batch=512,
     verbose=True,
 ):
-    num_cores: int = os.cpu_count() or 1
-    model = LlamaCppEmbeddings(
-        model_path=os.path.join(model_path, "ggml-model-q4_k.bin"),
-        n_ctx=n_ctx,
-        n_gpu_layers=n_gpu_layers,
-        n_batch=n_batch,
-        f16_kv=True,
-        n_threads=num_cores // 2,
+    model_norm = HuggingFaceBgeEmbeddings(
+        model_name = "BAAI/bge-large-en",
+        model_kwargs = {'device': 'cuda' },
+        encode_kwargs = { 'normalize_embeddings': True },
+        query_instruction = "Represent this sentence for searching relevant passages: "
     )
-    model.client.verbose = verbose
+    return model_norm
+    #num_cores: int = os.cpu_count() or 1
+    #model = LlamaCppEmbeddings(
+    #    model_path=os.path.join(model_path, "ggml-model-q4_k.bin"),
+    #    n_ctx=n_ctx,
+    #    n_gpu_layers=n_gpu_layers,
+    #    n_batch=n_batch,
+    #    f16_kv=True,
+    #    n_threads=num_cores // 2,
+    #)
+    #model.client.verbose = verbose
 
-    local_file_store: LocalFileStore = LocalFileStore(
-        os.path.join(model_path, ".cache")
-    )
-    cache_embedder = CacheBackedEmbeddings.from_bytes_store(
-        model, local_file_store, namespace="llama-cpp-embeddings"
-    )
+    #local_file_store: LocalFileStore = LocalFileStore(
+    #    os.path.join(model_path, ".cache")
+    #)
+    #cache_embedder = CacheBackedEmbeddings.from_bytes_store(
+    #    model, local_file_store, namespace="llama-cpp-embeddings"
+    #)
 
-    return cache_embedder
+    #return cache_embedder
