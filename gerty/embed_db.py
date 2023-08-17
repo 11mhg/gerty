@@ -29,7 +29,7 @@ def run():
     parser.add_argument(
         "--context-length",
         type=int,
-        default=2048,
+        default=4096,
         help="Context length to load the LLama embedding model with",
     )
     parser.add_argument(

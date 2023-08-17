@@ -33,7 +33,7 @@ from .utils import import_from_path
 class Gerty:
     def __init__(
         self,
-        n_ctx: int = 2048,
+        n_ctx: int = 4096,
         model_path: str = os.path.join(
             os.path.dirname(__file__), "models", "nous-hermes-llama-2-7b"
         ),
