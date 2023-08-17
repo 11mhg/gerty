@@ -1,7 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte/internal';
   import axios from 'axios';
-
+  import hljs from 'highlight.js';
+  import 'highlight.js/styles/github-dark.css';
+  import { storeHighlightJs } from '@skeletonlabs/skeleton';
+  
+  storeHighlightJs.set(hljs);
   axios.defaults.withCredentials = true;
   
   interface Session {
@@ -17,9 +21,8 @@
 
   let elemChat: HTMLElement;
   
-  let messageFeed: MessageFeed[] = [
-
-  ];
+  let messageFeed: MessageFeed[] = [];
+  let textAreaRef: any;
 
   let currentMessage = '';
   let waiting = false;
@@ -48,7 +51,7 @@
     };
     const newMessage = {
       name: name,
-      message: currentMessage,
+      message: currentMessage.replaceAll('\n', '<br />'),
       color: "variant-soft-primary"
     };
 
@@ -59,12 +62,16 @@
       waiting = true;
       scrollChatBottom();
       await queryLLM(newMessage.message);
+      scrollChatBottom();
+      setTimeout(()=>{
+        textAreaRef.focus();
+      }, 0);
       waiting = false;
     }, 0);
   }
 
   function onPromptKeydown(event: KeyboardEvent): void {
-    if (['Enter'].includes(event.code)) {
+    if (['Enter'].includes(event.code) && !event.shiftKey) {
       event.preventDefault();
       addMessage(true);
     }
@@ -112,10 +119,47 @@
     );
     clearInterval(messageIntervalRun);
 
-    assistantMessage.message = modelQueryRes.data;
+    assistantMessage.message = parseMessage(modelQueryRes.data);
     messageFeed[messageFeed.length-1] = assistantMessage;
     messageFeed = messageFeed;
   }
+
+  //function extractCodeMessage(str: string): string {
+  //  const firstIndex = str.indexOf('```'); //all code blocks begin with ```[language]\n
+  //  if (firstIndex < 0){
+  //    return str;
+  //  };
+  //  const languageEndIndex = firstIndex + 3 + str.substring(firstIndex+3).indexOf('\n');
+  //  if (languageEndIndex < 0){
+  //    return str;
+  //  };
+  //  const language = str.substring(firstIndex+3, languageEndIndex);
+  //  const endIndex = languageEndIndex + 1 + str.substring(languageEndIndex+1).indexOf('```');
+
+  //  const extractedCode = str.substring(languageEndIndex+1, endIndex);
+  //  if (extractedCode.length <=0){
+  //    return str;
+  //  }
+
+  //  let leftStr = str.slice(0, firstIndex);
+  //  let afterStr = str.slice(endIndex+3);
+
+  //  if (afterStr.indexOf('```') >= 0){
+  //    afterStr = extractCodeMessage(afterStr); 
+  //  }
+
+  //  const middle = `<CodeBlock language="${language}" code={\`${extractedCode}\`}></CodeBlock>`;
+
+  //  const rebuiltString = `${leftStr}\n${middle} ${afterStr}`;
+
+  //  return rebuiltString;
+  //};
+
+  function parseMessage( str: string): string {
+    str = str.replaceAll('\n', '<br />');
+    console.log("Parsed string: ", str);
+    return str;
+  };
 
 </script>
 
@@ -136,7 +180,7 @@
 				  		<header class="flex justify-between items-center">
 				  			<p class="font-bold">{bubble.name}</p>
 				  		</header>
-				  		<p class="break-all text-left">{bubble.message}</p>
+				  		<p class="break-words text-left">{@html bubble.message}</p>
 				  	</div>
 				  </div>       
         {:else}
@@ -145,7 +189,7 @@
 				  		<header class="flex justify-between items-center">
 				  			<p class="font-bold">{bubble.name}</p>
 				  		</header>
-				  		<p class="break-all text-left">{bubble.message}</p>
+				  		<p class="break-words text-left">{@html bubble.message}</p>
 				  	</div>
 				  </div>      
         {/if}
@@ -158,22 +202,24 @@
         {#if waiting}
 				  <textarea
 				  	bind:value={currentMessage}
+            bind:this={textAreaRef}
 				  	class="bg-transparent border-0 ring-0"
 				  	name="prompt"
 				  	id="prompt"
 				  	placeholder="Wait for response..."
-				  	rows="1"
-				  	on:keydown={onPromptKeydown}
+				  	rows="2"
+				  	on:keydown={()=>{}}
             disabled
 				  />
         {:else}
  				  <textarea
 				  	bind:value={currentMessage}
+            bind:this={textAreaRef}
 				  	class="bg-transparent border-0 ring-0"
 				  	name="prompt"
 				  	id="prompt"
 				  	placeholder="Write a prompt..."
-				  	rows="1"
+				  	rows="2"
 				  	on:keydown={onPromptKeydown}
 				  />
         {/if}
