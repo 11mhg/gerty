@@ -9,6 +9,10 @@ RAG is the process of augmenting text generation by using a vector store of docu
 RAG enables us to maintain some level of lucidity in our model generation text and enables us to reference direct textual information in our generation. 
 
 
+### Instructions on how to run
+
+***TODO: Update readme with instructions on how to run***
+
 ### NOTE
 
 This does not necessarily mean that you can trust the model more. Models are still able to hallucinate and return false answer. Caution is advised in accepting model answers. As they say "Trust but verify.".
