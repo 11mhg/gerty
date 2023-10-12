@@ -11,7 +11,7 @@ def valid_path(path: str):
 
 def run():
     parser = argparse.ArgumentParser(
-        prog="distributive llama2 application",
+        prog="a llama2 application",
         description="A small hack program for fun",
     )
     parser.add_argument(
