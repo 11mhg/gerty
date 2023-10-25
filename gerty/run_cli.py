@@ -7,8 +7,11 @@ from .gerty import Gerty
 
 
 def run():
+    """
+    A simple helper script to test out running a model with some prompts in cli.
+    """
     parser = argparse.ArgumentParser(
-        prog="gerty-cli", description="A small hack program for fun"
+        prog="gerty-cli", description="A small hack program for fun. Run the qa model in terminal."
     )
     parser.add_argument(
         "-db", "--database", type=valid_path, help="Cache knowledge base to this file"

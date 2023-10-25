@@ -12,9 +12,10 @@ def scrape_site(URL: str, visited: List[str] = []):
 
     Args:
         URL (str): URL String to parse for links.
-        visited ():
+        visited (List[str]): The list of visited URLs to ignore. Defaults to []. 
 
     Returns:
+        visited (List[str]): The list of already visited URLs.
 
     """
     if URL in visited:

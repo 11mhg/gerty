@@ -12,7 +12,7 @@ def valid_path(path: str):
 def run():
     parser = argparse.ArgumentParser(
         prog="a llama2 application",
-        description="A small hack program for fun",
+        description="A simple script to run through a particular knowledge base and embed all data into a db",
     )
     parser.add_argument(
         "knowledge_base",

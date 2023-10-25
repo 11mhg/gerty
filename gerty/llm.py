@@ -5,6 +5,10 @@ from langchain import LLMChain
 from langchain.callbacks.manager import CallbackManager
 
 class LlamaCppMiroStat(LlamaCpp): 
+    """
+    This class only exists to allow me to be able to
+    explicitly set the mirostat mode, eta, and tau values for generation.
+    """
 
     def _get_parameters(self, stop: Optional[List[str]] = None) -> Dict[str, Any]:
         if self.stop and stop is not None:
@@ -36,6 +40,9 @@ def get_model(
     n_batch = 512,
     callback_manager: Optional[CallbackManager] = None,
 ):
+    """
+    A simple helper to retrieve the llama model in question.
+    """
     num_cores: int = os.cpu_count() or 1
 
     llm = LlamaCppMiroStat(
